@@ -9,22 +9,46 @@ class Tweet {
 
 	//returns either 'live_event', 'achievement', 'completed_event', or 'miscellaneous'
     get source():string {
-        //TODO: identify whether the source is a live event, an achievement, a completed event, or miscellaneous.
-        return "unknown";
+        const normalizedText = this.text.toLowerCase();
+        if (this.text.startsWith("Watch my")) {
+            return "live_event";
+        }
+        if (normalizedText.startsWith("achieved a new personal record") ||
+            normalizedText.startsWith("i just set a goal") ||
+            normalizedText.includes("new pb") ||
+            normalizedText.includes("new fastest") ||
+            normalizedText.includes("farthest distance")) {
+            return "achievement";
+        }
+        if (this.text.startsWith("Just completed") || this.text.startsWith("Just posted")) {
+            return "completed_event";
+        }
+        return "miscellaneous";
     }
 
     //returns a boolean, whether the text includes any content written by the person tweeting.
     get written():boolean {
-        //TODO: identify whether the tweet is written
-        return false;
+        return this.userWrittenText.length > 0;
     }
 
     get writtenText():string {
-        if(!this.written) {
+        return this.userWrittenText;
+    }
+
+    private get userWrittenText():string {
+        const cleanedText = this.text
+            .replace(/https?:\/\/\S+/g, "")
+            .replace(/#Runkeeper\b/gi, "")
+            .trim();
+        const match = cleanedText.match(/^Just (?:completed|posted) a .+?\s+-\s+([\s\S]*)$/);
+        if (!match) {
             return "";
         }
-        //TODO: parse the written text from the tweet
-        return "";
+
+        const writtenText = match[1]
+            .replace(/\s+with @Runkeeper\. Check it out!$/i, "")
+            .trim();
+        return writtenText === "TomTom MySports Watch" ? "" : writtenText;
     }
 
     get activityType():string {
