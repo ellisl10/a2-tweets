@@ -19,6 +19,11 @@ https://www.geeksforgeeks.org/typescript/typescript-array-filter-method/
 https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce
 https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_expressions/Cheatsheet
 
+I used Vega-Lite examples and docs:
+https://vega.github.io/vega-lite/docs/encoding.html
+https://vega.github.io/vega-lite/docs/aggregate.html
+https://vega.github.io/vega-lite/examples/bar.html
+
 I used generative AI for help with formatting the tweets, specifically with using regex to clean the tweet of the hashtags and links. 
 I also used AI for help setting up my environment. For example, I had some issues installing packages, getting this error "Your cache folder contains root-owned files, due to a bug in
 npm error previous versions of npm which has since been addressed.", which I used AI to resolve.

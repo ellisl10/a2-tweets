@@ -55,16 +55,21 @@ class Tweet {
         if (this.source != 'completed_event') {
             return "unknown";
         }
-        //TODO: parse the activity type from the text of the tweet
-        return "";
+        const match = this.text.match(/^Just (?:completed|posted) an? (?:(?:[\d.]+)\s*(?:km|mi)\s+)?(.+?)(?=\s+(?:with @Runkeeper\b|[-–]\s|in \d|https?:\/\/)|\s+#Runkeeper|$)/i);
+        return match ? match[1].trim().toLowerCase() : "unknown";
     }
 
     get distance():number {
         if(this.source != 'completed_event') {
             return 0;
         }
-        //TODO: prase the distance from the text of the tweet
-        return 0;
+        const match = this.text.match(/^Just (?:completed|posted) an? ([\d.]+)\s*(km|mi)\b/i);
+        if (!match) {
+            return 0;
+        }
+
+        const distance = Number(match[1]);
+        return match[2].toLowerCase() === "km" ? distance / 1.609 : distance;
     }
 
     getHTMLTableRow(rowNumber:number):string {
