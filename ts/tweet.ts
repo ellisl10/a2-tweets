@@ -52,9 +52,6 @@ class Tweet {
     }
 
     get activityType():string {
-        if (this.source != 'completed_event') {
-            return "unknown";
-        }
         const match = this.text.match(/^Just (?:completed|posted) an? (?:(?:[\d.]+)\s*(?:km|mi)\s+)?(.+?)(?=\s+(?:with @Runkeeper\b|[-–]\s|in \d|https?:\/\/)|\s+#Runkeeper|$)/i);
         return match ? match[1].trim().toLowerCase() : "unknown";
     }
@@ -73,7 +70,25 @@ class Tweet {
     }
 
     getHTMLTableRow(rowNumber:number):string {
-        //TODO: return a table row which summarizes the tweet with a clickable link to the RunKeeper activity
-        return "<tr></tr>";
+        const escapeHTML = (value:string):string => value.replace(/[&<>"']/g, character => ({
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#39;"
+        })[character] || character);
+        let lastIndex = 0;
+        const linkedParts:string[] = [];
+        const urlPattern = /https?:\/\/\S+/g;
+        let match:RegExpExecArray | null;
+        while ((match = urlPattern.exec(this.text)) !== null) {
+            linkedParts.push(escapeHTML(this.text.slice(lastIndex, match.index)));
+            const safeURL = escapeHTML(match[0]);
+            linkedParts.push(`<a href="${safeURL}" target="_blank" rel="noopener noreferrer">${safeURL}</a>`);
+            lastIndex = match.index + match[0].length;
+        }
+        linkedParts.push(escapeHTML(this.text.slice(lastIndex)));
+        const linkedText = linkedParts.join("");
+        return `<tr><td>${rowNumber}</td><td>${escapeHTML(this.activityType)}</td><td>${linkedText}</td></tr>`;
     }
 }
