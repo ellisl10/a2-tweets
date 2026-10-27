@@ -43,32 +43,49 @@ function parseTweets(runkeeper_tweets) {
 			day: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][tweet.time.getUTCDay()]
 		}));
 	const weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-	const rawDistanceSpec = {
+	const rawDistanceValues = distanceValues.map(value => ({ ...value, displayMode: 'raw' }));
+	const meanDistanceValues = distanceValues.map(value => ({ ...value, displayMode: 'mean' }));
+	const distanceSpec = {
 		"$schema": "https://vega.github.io/schema/vega-lite/v5.json",
 		"description": "Activity distances by day of the week.",
-		"data": { "values": distanceValues },
-		"mark": "point",
-		"encoding": {
-			"x": { "field": "day", "type": "ordinal", "sort": weekdays, "title": "time (day)" },
-			"y": { "field": "distance", "type": "quantitative", "title": "distance" },
-			"color": { "field": "activityType", "type": "nominal", "title": "Activity type" }
-		}
-	};
-	const meanDistanceSpec = {
-		"$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-		"description": "Mean activity distance by day of the week.",
-		"data": { "values": distanceValues },
-		"mark": "point",
-		"encoding": {
-			"x": { "field": "day", "type": "ordinal", "sort": weekdays, "title": "time (day)" },
-			"y": { "aggregate": "mean", "field": "distance", "type": "quantitative", "title": "Mean of distance" },
-			"color": { "field": "activityType", "type": "nominal", "title": "Activity type" }
-		}
+		"data": { "name": "distanceData" },
+		"layer": [
+			{
+				"description": "Activity distances by day of the week.",
+				"transform": [{ "filter": "datum.displayMode === 'raw'" }],
+				"mark": "point",
+				"encoding": {
+					"x": { "field": "day", "type": "ordinal", "sort": weekdays, "title": "time (day)" },
+					"y": { "field": "distance", "type": "quantitative", "title": "distance" },
+					"color": { "field": "activityType", "type": "nominal", "title": "Activity type" }
+				}
+			},
+			{
+				"description": "Mean activity distances by day of the week.",
+				"transform": [{ "filter": "datum.displayMode === 'mean'" }],
+				"mark": "point",
+				"encoding": {
+					"x": { "field": "day", "type": "ordinal", "sort": weekdays, "title": "time (day)" },
+					"y": { "aggregate": "mean", "field": "distance", "type": "quantitative", "title": "Mean of distance" },
+					"color": { "field": "activityType", "type": "nominal", "title": "Activity type" }
+				}
+			}
+		]
 	};
 
-	vegaEmbed('#distanceVis', rawDistanceSpec, { actions: false });
-	vegaEmbed('#distanceVisAggregated', meanDistanceSpec, { actions: false });
-	document.getElementById('distanceVisAggregated').style.display = 'none';
+	let showingMeans = false;
+	let distanceView;
+	const updateDistanceData = () => {
+		if (distanceView) {
+			const nextValues = showingMeans ? meanDistanceValues : rawDistanceValues;
+			const changeSet = vega.changeset().remove(() => true).insert(nextValues);
+			distanceView.change('distanceData', changeSet).run();
+		}
+	};
+	vegaEmbed('#distanceVis', distanceSpec, { actions: false }).then(result => {
+		distanceView = result.view;
+		updateDistanceData();
+	});
 
 	const meansByActivity = topActivityTypes.map(activityType => {
 		const values = distanceValues.filter(value => value.activityType === activityType);
@@ -83,13 +100,11 @@ function parseTweets(runkeeper_tweets) {
 	const averageDistance = values => values.length ? values.reduce((sum, value) => sum + value.distance, 0) / values.length : 0;
 	document.getElementById('weekdayOrWeekendLonger').innerText = averageDistance(weekdayValues) >= averageDistance(weekendValues) ? 'weekdays' : 'weekends';
 
-	let showingMeans = false;
 	const aggregateButton = document.getElementById('aggregate');
 	aggregateButton.addEventListener('click', () => {
 		showingMeans = !showingMeans;
-		document.getElementById('distanceVis').style.display = showingMeans ? 'none' : 'block';
-		document.getElementById('distanceVisAggregated').style.display = showingMeans ? 'block' : 'none';
 		aggregateButton.innerText = showingMeans ? 'Show all activities' : 'Show means';
+		updateDistanceData();
 	});
 }
 
