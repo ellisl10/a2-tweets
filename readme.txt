@@ -7,6 +7,8 @@
 - 4/4 Identifying the most popular activities
 - 3/3 Adding a text search interface
 
+- 1/1 bonus features (Used Vega-Lite's streaming data to dynamically change one chart when the aggregate button is pressed)
+
 2. How long, in hours, did it take you to complete this assignment?
 8 hours
 
