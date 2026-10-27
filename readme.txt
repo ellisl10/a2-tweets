@@ -10,7 +10,7 @@
 - 1/1 bonus features (Used Vega-Lite's streaming data to dynamically change one chart when the aggregate button is pressed)
 
 2. How long, in hours, did it take you to complete this assignment?
-8 hours
+9 hours
 
 
 3. What online resources did you consult when completing this assignment? (list sites like StackOverflow or specific URLs for tutorials; describe queries to Generative AI or use of AI-based code completion)
